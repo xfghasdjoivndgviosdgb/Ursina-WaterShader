@@ -13,6 +13,7 @@ uniform vec3 lightPos;
 uniform vec3 cameraPos;
 uniform sampler2D heightMap;
 uniform vec2 textureoffset;
+uniform vec2 textureoffset_sec;
 uniform sampler2D normalMap;
 
 in vec2 p3d_MultiTexCoord0;
@@ -24,11 +25,13 @@ out vec3 vectorToCamera;
 out vec2 texcoord;
 out float alpha;
 
-void main(){
-    vec2 coord=p3d_MultiTexCoord0+textureoffset;
-    float hgt=texture(heightMap,coord).x*50;
 
-    gl_Position=p3d_ModelViewProjectionMatrix*vec4(vertex.x,vertex.y+hgt,vertex.z,vertex.w);
+void main(){
+    vec2 coord=(p3d_MultiTexCoord0+textureoffset);
+    vec2 coord_sec=(p3d_MultiTexCoord0+textureoffset_sec);
+    float hgt=texture(heightMap,coord).x*50;
+    float hgt_sec=texture(heightMap,coord_sec).x*50;
+    gl_Position=p3d_ModelViewProjectionMatrix*vec4(vertex.x,vertex.y+(hgt+hgt_sec)/2,vertex.z,vertex.w);
     vec3 worldPos=(p3d_ModelMatrix*vertex).xyz;
     vectorToLight=lightPos-worldPos;
     vectorToCamera=(inverse(p3d_ViewMatrix)*vec4(0.0,0.0,0.0,1.0)).xyz-worldPos.xyz;
@@ -113,22 +116,30 @@ if __name__=="__main__":
     light_y=0
     offset_x=0
     offset_y=0
+    offset_x2=0
+    offset_y2=0
     def update():
         global light_x
         global light_y
         global offset_x
         global offset_y
+        global offset_x2
+        global offset_y2
         a.set_shader_input("cameraPos",p.position)
         a.set_shader_input("textureoffset",Vec2(offset_x,offset_y))
+        a.set_shader_input("textureoffset_sec",Vec2(offset_x2,offset_y2))
         offset_x+=0.07*time.dt
+        offset_x2-=0.07*time.dt
+        offset_y2+=0.07*time.dt
 
     app=Ursina()
     p=EditorCamera()
-    a=water(0,300)
+    a=water(-2,500)
     a.set_shader_input("lightPos",Vec3(25,100,25))
     a.set_shader_input("reflectivity",1.0)
     a.set_shader_input("Damper",14.0)
     a.set_shader_input("lightColor",Vec3(1,1,1))
     a.set_shader_input("normalMap",load_texture("water_normalMap"))
     a.set_shader_input("heightMap",load_texture("water_heightMap"))
+    Sky()
     app.run()

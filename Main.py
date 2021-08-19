@@ -93,7 +93,7 @@ class water(Entity):
 
                 self.vertices.extend((Vec3(x,self.hgt,z),Vec3(x+1,self.hgt,z),Vec3(x+1,self.hgt,z+1),Vec3(x,self.hgt,z+1)))
                 self.triangles.extend(((index,index+1,index+2),(index+0,index+2,index+3)))
-                self.uvs.extend(((Vec2(x/size,(1+z)/size),Vec2((1+x)/size,(1+z)/size),Vec2((1+x)/size,z/size),Vec2(x/size,z/size))))
+                self.uvs.extend(((Vec2(x/size,(z)/size),Vec2((1+x)/size,(z)/size),Vec2((1+x)/size,(z+1)/size),Vec2(x/size,(z+1)/size))))
 
 
 

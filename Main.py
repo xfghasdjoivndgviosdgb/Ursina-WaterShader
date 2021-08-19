@@ -22,6 +22,7 @@ in vec4 normal;
 out vec3 vectorToLight;
 out vec3 vectorToCamera;
 out vec2 texcoord;
+out float alpha;
 
 void main(){
     vec2 coord=p3d_MultiTexCoord0+textureoffset;
@@ -31,7 +32,11 @@ void main(){
     vec3 worldPos=(p3d_ModelMatrix*vertex).xyz;
     vectorToLight=lightPos-worldPos;
     vectorToCamera=(inverse(p3d_ViewMatrix)*vec4(0.0,0.0,0.0,1.0)).xyz-worldPos.xyz;
-    texcoord=coord;
+    texcoord=coord*12;
+    alpha=hgt/40;
+    alpha-=sin(dot(vectorToCamera,vec3(0,1,0)))/180;
+    alpha=max(alpha,0.1);
+    alpha+=0.1;
 }
 """,fragment="""
 #version 140
@@ -47,6 +52,7 @@ in vec3 vectorToLight;
 in vec3 vectorToCamera;
 in vec2 texcoord;
 in vec3 surfaceNormal;
+in float alpha;
 
 out vec4 out_color;
 
@@ -66,8 +72,8 @@ void main(){
     specular=max(specular,0.0);
     float damper=pow(specular,Damper);
     vec3 finalSpecular=damper*reflectivity*lightColor;
-    out_color=vec4(diffuse,1.0)*color+vec4(finalSpecular,1.0);
-    //out_color=vec4(unitNormal,1.0);
+    vec4 color_final=vec4(diffuse,1.0)*color+vec4(finalSpecular,1.0);
+    out_color=vec4(color_final.xyz,alpha+dot(unitToCamera,surfaceNormal)/5);
 }
 """)
 
@@ -121,7 +127,7 @@ if __name__=="__main__":
     a=water(0,300)
     a.set_shader_input("lightPos",Vec3(25,100,25))
     a.set_shader_input("reflectivity",1.0)
-    a.set_shader_input("Damper",10.0)
+    a.set_shader_input("Damper",14.0)
     a.set_shader_input("lightColor",Vec3(1,1,1))
     a.set_shader_input("normalMap",load_texture("water_normalMap"))
     a.set_shader_input("heightMap",load_texture("water_heightMap"))

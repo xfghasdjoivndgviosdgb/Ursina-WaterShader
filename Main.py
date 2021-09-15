@@ -76,7 +76,7 @@ void main(){
     float damper=pow(specular,Damper);
     vec3 finalSpecular=damper*reflectivity*lightColor;
     vec4 color_final=vec4(diffuse,1.0)*color+vec4(finalSpecular,1.0);
-    out_color=vec4(color_final.xyz,alpha+dot(unitToCamera,surfaceNormal)/5);
+    out_color=vec4(color_final.xyz,1.0);
 }
 """)
 
